@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>O algoritmo conhece você?</title>
+<style>
+:root{--bg:#04070f;--bg2:#0a1226;--card:#0d1a33;--line:#1b3260;--blue:#2d7bff;--glow:#4da3ff;--tx:#eaf1ff;--mut:#a9b8d6;--ok:#38d39f;--bad:#ff6b7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+a{color:var(--glow)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(4,7,15,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 18px}
+.logo{font-weight:800;color:var(--glow);letter-spacing:.3px}
+nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+nav a{display:block;padding:6px 9px;border-radius:8px;color:var(--mut);text-decoration:none;font-size:13.5px}
+nav a:hover,nav a:focus-visible{background:var(--card);color:var(--tx)}
+#mb{display:none}
+@media(max-width:1000px){#mb{display:block}nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--bg2);border-bottom:1px solid var(--line);padding:8px 14px}nav.open{display:block}nav ul{flex-direction:column}nav a{font-size:16px;padding:10px}}
+section{max-width:1100px;margin:auto;padding:64px 18px}
+h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1.1;margin:.2em 0}
+h2{font-size:clamp(1.6rem,4vw,2.3rem);margin:0 0 .4em;color:#fff}
+h2 span{color:var(--glow);font-size:.6em;display:block;letter-spacing:2px;text-transform:uppercase}
+h3{margin:.2em 0 .4em;font-size:1.1rem}
+p{margin:.5em 0;color:var(--mut)}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center;min-height:80vh}
+@media(max-width:800px){.hero{grid-template-columns:1fr}}
+.slogan{color:var(--glow);font-size:1.3rem;font-weight:600}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+button,.btn{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--blue);background:transparent;color:var(--tx);padding:9px 16px;text-decoration:none;display:inline-block;transition:.2s}
+button:hover,.btn:hover{background:rgba(45,123,255,.2);box-shadow:0 0 14px rgba(45,123,255,.4)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.pri{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.pri:hover{background:#4a8dff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:flex-start}
+.card button{margin-top:10px}
+.more{display:none;margin-top:10px;padding:10px 12px;border-left:3px solid var(--blue);background:rgba(45,123,255,.08);border-radius:0 8px 8px 0;font-size:.95rem;color:var(--tx);width:100%}
+.more.show{display:block}
+.note{border:1px solid var(--glow);background:rgba(77,163,255,.08);border-radius:12px;padding:14px 16px;margin-top:18px;color:var(--tx)}
+.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.flow .arr{color:var(--glow);font-size:1.5rem}
+.node{min-width:150px;font-weight:600}
+.node.on{background:var(--blue);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{border-radius:999px;padding:6px 14px;font-size:.95rem}
+.chip[aria-pressed=true]{background:var(--blue);color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.pro h3{color:var(--ok)}.con h3{color:var(--bad)}
+ul.chk{list-style:none;padding:0}
+ul.chk li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+ul.chk label{display:flex;gap:10px;cursor:pointer;font-weight:600;align-items:flex-start}
+ul.chk input{width:20px;height:20px;margin-top:3px;accent-color:var(--blue)}
+ul.chk small{display:block;color:var(--mut);font-weight:400;margin-left:30px}
+.bar2{height:10px;background:var(--card);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar2 i{display:block;height:100%;background:var(--blue);width:0;transition:width .4s}
+select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px}
+.rec{border-left:3px solid var(--glow)}
+.rec small{color:var(--mut)}
+.opt{display:block;width:100%;text-align:left;margin:8px 0}
+.opt[aria-checked=true]{background:rgba(45,123,255,.3)}
+.opt.ok{border-color:var(--ok);background:rgba(56,211,159,.15)}
+.opt.no{border-color:var(--bad);background:rgba(255,107,122,.15)}
+footer{text-align:center;padding:30px 18px;color:var(--mut);border-top:1px solid var(--line)}
+.fin{font-size:1.5rem;color:#fff;font-weight:700;text-align:center;padding:26px;border:1px solid var(--blue);border-radius:16px;background:linear-gradient(135deg,#0a1a45,#04070f);margin-top:20px}
+.pulse{animation:p 3s ease-in-out infinite}@keyframes p{50%{opacity:.5}}
+
+/* ===== REDESIGN ===== */
+:root{--bg:#03050c;--bg2:#070d1f;--card:#0a1530;--line:#1a2f5e;--cy:#35e0ff;--pu:#8b5cff}
+body{overflow-x:hidden;background:radial-gradient(900px 500px at 85% -5%,rgba(45,123,255,.22),transparent 70%),radial-gradient(700px 500px at 0 25%,rgba(139,92,255,.12),transparent 70%),var(--bg)}
+header{background:rgba(3,5,12,.82);box-shadow:0 1px 24px rgba(45,123,255,.12)}
+.logo{background:linear-gradient(90deg,#4da3ff,#35e0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+nav a{transition:.2s}nav a.act{color:#fff;background:rgba(45,123,255,.2);box-shadow:inset 0 -2px var(--glow)}
+section{position:relative}
+section::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:50%;width:100vw;margin-left:-50vw;pointer-events:none}
+#conceito::before{background:linear-gradient(180deg,transparent,rgba(10,21,48,.7) 30%,transparent)}
+#interesses::before{background:radial-gradient(700px 350px at 90% 20%,rgba(139,92,255,.16),transparent 70%)}
+#cotidiano::before{background:linear-gradient(180deg,rgba(10,21,48,.6),transparent)}
+#criacao::before{background:radial-gradient(700px 350px at 5% 30%,rgba(53,224,255,.1),transparent 70%)}
+#riscos::before{background:linear-gradient(90deg,rgba(56,211,159,.07),transparent 40%,transparent 60%,rgba(255,107,122,.07))}
+#privacidade::before{background:linear-gradient(180deg,transparent,rgba(10,21,48,.7),transparent)}
+#experimento::before{background:radial-gradient(900px 500px at 50% 30%,rgba(45,123,255,.2),transparent 70%)}
+#mitos::before{background:radial-gradient(600px 300px at 80% 10%,rgba(139,92,255,.14),transparent 70%)}
+#quiz::before{background:radial-gradient(700px 400px at 20% 40%,rgba(45,123,255,.15),transparent 70%)}
+#conclusao::before{background:radial-gradient(900px 400px at 50% 100%,rgba(45,123,255,.3),transparent 70%)}
+h1{letter-spacing:-1.5px}
+h1 em{font-style:normal;color:#4da3ff;background:linear-gradient(90deg,#4da3ff,#35e0ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+h2{letter-spacing:-.5px}
+h2 span{background:linear-gradient(90deg,var(--cy),var(--pu));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.g{background:linear-gradient(90deg,#4da3ff,#35e0ff);-webkit-background-clip:text;background-clip:text;color:#4da3ff;-webkit-text-fill-color:transparent}
+.hero{min-height:calc(100vh - 64px)}
+.hero svg{width:100%;height:auto;max-height:78vh}
+button,.btn{min-height:44px;border-color:rgba(77,163,255,.55);background:rgba(7,13,31,.7);box-shadow:0 0 0 1px rgba(77,163,255,.08) inset}
+button:hover,.btn:hover{border-color:var(--cy);transform:translateY(-1px)}
+button:active,.btn:active{transform:translateY(1px)}
+.pri{background:linear-gradient(135deg,#2d7bff,#5a5cff);border-color:transparent;box-shadow:0 4px 22px rgba(45,123,255,.45)}
+.pri:hover{background:linear-gradient(135deg,#4a8dff,#7b6cff);box-shadow:0 6px 28px rgba(77,163,255,.6)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px;margin-top:20px}
+.tiles a{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:16px 8px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--tx);text-decoration:none;font-size:.9rem;transition:.25s}
+.tiles a:hover{border-color:var(--cy);box-shadow:0 0 22px rgba(53,224,255,.25);transform:translateY(-3px)}
+.tiles i{font-style:normal;font-size:1.7rem;filter:drop-shadow(0 0 8px rgba(77,163,255,.7))}
+.card{background:linear-gradient(160deg,rgba(13,26,60,.95),rgba(7,13,31,.95));box-shadow:0 6px 24px rgba(0,0,0,.35);transition:opacity .6s,translate .6s,transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 10px 34px rgba(45,123,255,.25)}
+.more{display:block;max-height:0;opacity:0;visibility:hidden;overflow:hidden;margin-top:0;padding-top:0;padding-bottom:0;transition:max-height .4s ease,opacity .3s,margin .3s,padding .3s,visibility 0s .4s}
+.more.show{max-height:700px;opacity:1;visibility:visible;margin-top:10px;padding-top:10px;padding-bottom:10px;transition:max-height .4s ease,opacity .3s .05s,margin .3s,padding .3s,visibility 0s}
+.note{background:linear-gradient(135deg,rgba(45,123,255,.12),rgba(139,92,255,.08));box-shadow:0 0 24px rgba(45,123,255,.1)}
+.flow{padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(7,13,31,.6)}
+.node{min-height:48px;border-radius:12px}
+.node.on{background:linear-gradient(135deg,#2d7bff,#5a5cff);box-shadow:0 0 22px rgba(77,163,255,.5);border-color:transparent}
+.arr{text-shadow:0 0 10px var(--glow)}
+.chip{transition:.2s}.chip[aria-pressed=true]{background:linear-gradient(135deg,#2d7bff,#5a5cff);border-color:transparent;box-shadow:0 0 16px rgba(77,163,255,.5)}
+.chip[aria-pressed=true]::before{content:"✓ "}
+#pro,#con{display:grid;gap:14px}
+.pro .card{border-color:rgba(56,211,159,.35);background:linear-gradient(160deg,rgba(56,211,159,.1),rgba(7,13,31,.95))}
+.con .card{border-color:rgba(255,107,122,.35);background:linear-gradient(160deg,rgba(255,107,122,.1),rgba(7,13,31,.95))}
+.pro h3::before{content:"✔ ";color:var(--ok)}.con h3::before{content:"⚠ ";color:var(--bad)}
+.lab{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:800px){.lab{grid-template-columns:1fr}}
+.pn{background:rgba(7,13,31,.75);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 0 30px rgba(45,123,255,.1)}
+.pn:nth-child(2){border-color:rgba(139,92,255,.5)}
+.pipe{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0 0;color:var(--mut);font-size:.9rem}
+.pipe span{padding:4px 12px;border:1px solid var(--line);border-radius:999px}.pipe b{color:var(--cy)}
+#out .rec{animation:up .5s both}#out .rec:nth-child(2){animation-delay:.08s}#out .rec:nth-child(3){animation-delay:.16s}#out .rec:nth-child(4){animation-delay:.24s}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.bar2 i{background:linear-gradient(90deg,#2d7bff,#35e0ff);box-shadow:0 0 10px rgba(53,224,255,.6)}
+.rec{border-left:3px solid var(--cy)}
+#mit .card::before{content:"?";font-size:2.2rem;line-height:1;color:var(--cy);text-shadow:0 0 16px var(--cy);margin-bottom:6px}
+#mit .card:nth-child(even)::before{content:"!";color:var(--pu);text-shadow:0 0 16px var(--pu)}
+.opt{border-radius:12px;padding:12px 14px;min-height:48px}
+.opt[aria-checked=true]{border-color:var(--glow);box-shadow:0 0 0 1px var(--glow),0 0 18px rgba(77,163,255,.35)}
+.opt.ok{box-shadow:0 0 18px rgba(56,211,159,.35)}.opt.no{box-shadow:0 0 18px rgba(255,107,122,.3)}
+#qz{padding:24px;box-shadow:0 0 40px rgba(45,123,255,.15)}
+.fin{box-shadow:0 0 50px rgba(45,123,255,.35)}
+footer{text-align:left;background:linear-gradient(180deg,transparent,#050a18)}
+.fw{max-width:1100px;margin:auto;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.fl{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;max-width:520px}.fl a{color:var(--mut);text-decoration:none;font-size:.9rem}.fl a:hover{color:var(--tx)}
+.fn{max-width:1100px;margin:24px auto 0;font-size:.85rem;border-top:1px solid var(--line);padding-top:14px}
+.js .rv{opacity:0;translate:0 16px;transition:opacity .6s,translate .6s}.js .rv.in{opacity:1;translate:0 0}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#0d1a33;border:1px solid var(--cy);color:#fff;padding:10px 18px;border-radius:999px;box-shadow:0 0 24px rgba(53,224,255,.35);opacity:0;pointer-events:none;transition:.3s;z-index:20;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){.js .rv{opacity:1;translate:none}#out .rec{animation:none}}
+
+/* ===== ABAS + FUNDO TECNOLÓGICO ===== */
+body{--x:85%;--c1:45,123,255;--c2:139,92,255;background:radial-gradient(900px 520px at var(--x) -5%,rgba(var(--c1),.26),transparent 70%),radial-gradient(700px 500px at calc(100% - var(--x)) 45%,rgba(var(--c2),.15),transparent 70%),var(--bg)}
+body[data-t=algoritmos]{--x:12%}body[data-t=interesses]{--x:60%;--c2:53,224,255}body[data-t=cotidiano]{--x:30%}body[data-t=riscos]{--x:50%}body[data-t=privacidade]{--x:75%;--c2:53,224,255}body[data-t=experimento]{--x:50%}body[data-t=mitos]{--x:20%}body[data-t=quiz]{--x:70%}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:linear-gradient(rgba(45,123,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(45,123,255,.07) 1px,transparent 1px),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><g fill='none' stroke='%234da3ff' stroke-opacity='.14'><path d='M0 30h40l10 10h30M60 0v40l20 20h40M20 120v-40l20-20h20M120 90H90l-10 10v20'/></g><g fill='%2335e0ff' fill-opacity='.35'><circle cx='40' cy='30' r='2'/><circle cx='80' cy='40' r='2'/><circle cx='60' cy='40' r='2'/><circle cx='90' cy='90' r='2'/></g></svg>");background-size:48px 48px,48px 48px,120px 120px;-webkit-mask-image:radial-gradient(ellipse at 50% 35%,#000 20%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 35%,#000 20%,transparent 78%)}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;opacity:.8}
+[data-tab].off{display:none!important}
+[data-tab].enter{animation:tin .35s ease both}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+section{padding:36px 18px 56px}
+.hero{padding-top:24px}
+header .bar{padding:10px 18px}.logo small{display:block;font-weight:500;font-size:.72rem;letter-spacing:1.5px;-webkit-text-fill-color:var(--mut);color:var(--mut)}
+@media(min-width:1001px){#mb{display:none}nav{display:block;max-width:1100px;margin:0 auto;padding:0 18px}nav ul{flex-wrap:nowrap;overflow-x:auto;gap:2px;scrollbar-width:none}nav a{white-space:nowrap;text-transform:uppercase;font-size:12px;letter-spacing:.9px;font-weight:700;padding:12px 13px;border-radius:10px 10px 0 0}}
+nav a[aria-current]{color:#fff;background:linear-gradient(180deg,transparent,rgba(45,123,255,.28));box-shadow:inset 0 -3px var(--cy)}
+.seg{max-width:1100px;margin:auto;padding:26px 18px 0;display:flex;gap:8px;flex-wrap:wrap}
+.seg button{border-radius:999px;padding:8px 18px}.seg button[aria-pressed=true]{background:linear-gradient(135deg,#1850d8,#1580d0);border-color:var(--cy);color:#fff;box-shadow:0 0 18px rgba(39,196,255,.4)}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+button,.btn{border-radius:12px;border:1px solid var(--line);background:rgba(10,21,48,.6);color:var(--tx);font-weight:600;letter-spacing:.3px;box-shadow:none;transition:transform .15s,box-shadow .25s,background .25s,border-color .25s,filter .15s}
+button:hover,.btn:hover{border-color:var(--glow);background:rgba(45,123,255,.18);transform:translateY(-1px);box-shadow:none}
+.sec{border-color:var(--blue);background:rgba(5,10,26,.85);box-shadow:0 0 16px rgba(45,123,255,.3)}
+.sec:hover{border-color:var(--cy);box-shadow:0 0 26px rgba(77,163,255,.55);background:rgba(45,123,255,.2)}
+.pri{background:linear-gradient(135deg,#1850d8,#1580d0);color:#fff;border:1px solid rgba(255,255,255,.25);box-shadow:0 4px 24px rgba(39,196,255,.4);text-transform:uppercase;letter-spacing:.7px;font-weight:800}
+.pri:hover{background:linear-gradient(135deg,#2a63e8,#1a97e6);border-color:#fff;box-shadow:0 6px 32px rgba(39,196,255,.65);filter:brightness(1.1)}
+.pri:active,.sec:active,button:active{filter:brightness(.9);transform:translateY(1px)}
+.big{padding:15px 26px;font-size:1rem}
+button:disabled{opacity:.6;cursor:wait}.busy{animation:p 1s infinite}
+.card>button{text-transform:uppercase;font-size:.78rem;letter-spacing:.7px;padding:8px 14px}
+.card>button::before{content:"＋ "}.card>button[aria-expanded=true]::before{content:"− "}
+.card{background-image:repeating-linear-gradient(135deg,rgba(77,163,255,.05) 0 1px,transparent 1px 9px),linear-gradient(160deg,rgba(13,26,60,.95),rgba(7,13,31,.95))}
+.tg{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.tag{border:1px solid var(--line);background:rgba(10,21,48,.7);border-radius:999px;padding:4px 12px;font-size:.85rem;color:var(--mut)}
+.stp{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1850d8,#27c4ff);color:#fff;font-size:.9rem;margin-right:8px;box-shadow:0 0 14px rgba(39,196,255,.5)}
+#ints{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}#ints .chip{border-radius:12px;text-align:center;min-height:44px}
+.opt{font-size:1rem}
+@media(prefers-reduced-motion:reduce){[data-tab].enter{animation:none}#bg{display:none}}
+</style>
+</head>
+<body>
+<header><div class="bar"><span class="logo">◉ O algoritmo conhece você? <small>O futuro em cada algoritmo</small></span><button id="mb" aria-expanded="false" aria-controls="nav">☰ Menu</button></div>
+<nav id="nav" aria-label="Abas do site"><ul>
+<li><a href="#inicio">Início</a></li><li><a href="#conceito">Algoritmos</a></li><li><a href="#interesses">Como ele conhece você</a></li><li><a href="#cotidiano">No cotidiano</a></li><li><a href="#riscos">Benefícios e riscos</a></li><li><a href="#privacidade">Privacidade</a></li><li><a href="#experimento">Experimento</a></li><li><a href="#mitos">Mitos e verdades</a></li><li><a href="#quiz">Quiz</a></li></ul></nav></header>
+<canvas id="bg" aria-hidden="true"></canvas>
+<main>
+<section data-tab="inicio" id="inicio" class="hero"><div>
+<h1>O algoritmo conhece <em>você?</em></h1><p class="slogan">O futuro em cada algoritmo</p>
+<p>Algoritmos estão presentes em muitas atividades digitais: desde uma pesquisa na internet até as recomendações de vídeos, músicas e publicações que aparecem para você. Neste projeto, você vai entender como eles são criados, como usam dados e quais são seus benefícios e riscos.</p>
+<div class="tg"><span class="tag">⚙ Como funcionam</span><span class="tag">🎯 Como usam seus dados</span><span class="tag">⚖ Benefícios e riscos</span><span class="tag">🔒 Privacidade</span></div><div class="btns"><a class="btn pri big" href="#experimento">▶ COMECE O EXPERIMENTO</a><a class="btn sec" href="#conceito">◈ DESCUBRA COMO FUNCIONA</a><a class="btn" href="#quiz">✦ TESTE O ALGORITMO</a></div></div>
+<svg viewBox="0 0 460 420" role="img" aria-label="Ilustração de um rosto humano de perfil, formado por conexões neurais, cercado por painéis de dados">
+<defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#35e0ff"/><stop offset=".6" stop-color="#2d7bff"/><stop offset="1" stop-color="#8b5cff"/></linearGradient>
+<radialGradient id="hg" cx=".7" cy=".4" r=".7"><stop offset="0" stop-color="#1a3d8f"/><stop offset="1" stop-color="#050b1c"/></radialGradient>
+<clipPath id="hc"><path id="hp" d="M250 50C310 55 345 105 340 165C337 205 320 225 318 250L318 330L200 330L205 290C190 285 188 275 196 268C186 262 190 252 196 246C190 240 190 232 198 226L192 218C182 214 184 205 192 200C196 160 190 120 205 95C218 68 235 52 250 50Z"/></clipPath>
+<filter id="gl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+<circle cx="262" cy="190" r="172" fill="none" stroke="url(#gr)" stroke-width="2" stroke-dasharray="520 560" opacity=".9"/>
+<circle cx="262" cy="190" r="150" fill="none" stroke="#2d7bff" stroke-width="1" stroke-dasharray="3 9" opacity=".5"/>
+<use href="#hp" fill="none" stroke="#4da3ff" stroke-width="6" filter="url(#gl)" opacity=".8"/>
+<use href="#hp" fill="url(#hg)" stroke="url(#gr)" stroke-width="2"/>
+<g clip-path="url(#hc)" stroke="#4da3ff" stroke-width="1" opacity=".75"><path d="M215 100L255 120L300 95L330 150L280 170L240 150L215 100M255 120L280 170L300 230L250 250L210 215L240 150M300 230L318 290L250 300L250 250M330 150L335 215L300 230M215 100L205 170L210 215M255 120L250 60M240 150L205 170"/>
+<g fill="#35e0ff" class="pulse"><circle cx="215" cy="100" r="4"/><circle cx="255" cy="120" r="4"/><circle cx="300" cy="95" r="4"/><circle cx="330" cy="150" r="4"/><circle cx="280" cy="170" r="5"/><circle cx="240" cy="150" r="4"/><circle cx="300" cy="230" r="4"/><circle cx="250" cy="250" r="4"/><circle cx="210" cy="215" r="4"/><circle cx="318" cy="290" r="4"/><circle cx="250" cy="300" r="4"/></g></g>
+<g font-family="system-ui,sans-serif" font-size="13" fill="#eaf1ff"><g transform="translate(20 60)"><rect width="92" height="56" rx="8" fill="#0a1530" stroke="#2d7bff"/><rect x="10" y="12" width="50" height="6" rx="3" fill="#35e0ff"/><rect x="10" y="26" width="70" height="5" rx="2" fill="#2d7bff"/><rect x="10" y="38" width="38" height="5" rx="2" fill="#8b5cff"/></g>
+<g transform="translate(14 250)"><rect width="100" height="60" rx="8" fill="#0a1530" stroke="#8b5cff"/><path d="M12 46L32 30L50 38L70 18L88 26" fill="none" stroke="#35e0ff" stroke-width="2"/></g>
+<g transform="translate(345 262)"><rect width="105" height="28" rx="8" fill="#0a1530" stroke="#2d7bff"/><text x="52" y="19" text-anchor="middle">Dados</text></g>
+<g transform="translate(345 300)"><rect width="105" height="28" rx="8" fill="#0a1530" stroke="#35e0ff"/><text x="52" y="19" text-anchor="middle">Padrões</text></g>
+<g transform="translate(345 338)"><rect width="105" height="28" rx="8" fill="#0a1530" stroke="#8b5cff"/><text x="52" y="19" text-anchor="middle">Recomendações</text></g></g></svg></section>
+
+<section data-tab="inicio" id="explorar"><h2 style="text-align:center">O que você vai <span class="g" style="display:inline;font-size:1em;letter-spacing:0;text-transform:none">encontrar</span></h2><p style="text-align:center">Escolha um tema para abrir a aba correspondente.</p><div class="tiles">
+<a href="#conceito"><i>💡</i>Algoritmos</a><a href="#interesses"><i>🎯</i>Interesses</a><a href="#cotidiano"><i>📱</i>Cotidiano</a><a href="#criacao"><i>🛠️</i>Criação</a><a href="#riscos"><i>⚖️</i>Benefícios e riscos</a><a href="#privacidade"><i>🔒</i>Privacidade</a><a href="#experimento"><i>🧪</i>Experimento</a><a href="#mitos"><i>❓</i>Mitos</a><a href="#quiz"><i>🏆</i>Quiz</a></div></section>
+<div class="seg" data-tab="algoritmos"><button data-go="conceito" aria-pressed="true">O que é um algoritmo</button><button data-go="criacao" aria-pressed="false">Como são criados</button></div>
+<section data-tab="algoritmos" data-sub="a" id="conceito"><h2><span>01</span>O que é um algoritmo?</h2>
+<p>Algoritmo é uma sequência finita de passos bem definidos para resolver um problema ou realizar uma tarefa. Uma receita de bolo, o caminho que você faz para chegar à escola e as regras para dividir uma conta são exemplos cotidianos de algoritmos. Em computação, esses passos são escritos para que uma máquina os execute.</p>
+<div class="grid" id="tipos"></div>
+<h3 style="margin-top:28px">Fluxograma interativo</h3><p>Clique em cada etapa para ver o que acontece.</p>
+<div class="flow" id="flow"></div><div class="note" id="flowtxt" aria-live="polite"></div>
+<div class="btns"><button data-t="ex1">Ver exemplo</button><button data-t="ex2">Saiba mais</button></div>
+<div class="more" id="ex1">Exemplo: ao digitar “receita de bolo” (entrada), o buscador compara o texto com páginas indexadas e as ordena por critérios de relevância (processamento) e mostra a lista de links (resultado).</div>
+<div class="more" id="ex2">Saiba mais: um algoritmo pode ser muito simples (somar duas notas) ou muito complexo. O que o define é a clareza dos passos, não o uso de computador ou de inteligência artificial.</div><div class="cta"><button class="pri" data-go="criacao">▶ VEJA AS ETAPAS</button></div></section>
+
+<section data-tab="interesses" id="interesses"><h2><span>02</span>Como os algoritmos conhecem nossos interesses?</h2>
+<p>Alguns sistemas, como os de recomendação, podem usar sinais do seu comportamento digital para identificar padrões. Clique nos cartões para ver uma explicação e um exemplo.</p>
+<div class="grid" id="sinais"></div>
+<h3 style="margin-top:28px">Do dado à recomendação</h3>
+<div class="flow" id="diag"></div><div class="note" id="diagtxt" aria-live="polite"></div>
+<div class="note"><b>Importante:</b> algoritmos fazem estimativas. Eles podem errar e não conhecem necessariamente seus pensamentos, sua personalidade ou seus motivos reais. Uma pesquisa pode ser curiosidade, trabalho escolar ou um pedido de outra pessoa.</div><div class="cta"><button class="pri" data-go="experimento">▶ DESCUBRA O QUE INFLUENCIA AS RECOMENDAÇÕES</button></div></section>
+
+<section data-tab="cotidiano" id="cotidiano"><h2><span>03</span>Algoritmos no cotidiano</h2><div class="grid" id="cot"></div><div class="cta"><button class="pri" data-go="riscos">▶ ENTENDA BENEFÍCIOS E RISCOS</button></div></section>
+
+<section data-tab="algoritmos" data-sub="b" id="criacao"><h2><span>04</span>Como os algoritmos são criados?</h2>
+<p>O desenvolvimento costuma seguir etapas, que podem se repetir várias vezes. Clique em cada uma.</p><div class="grid" id="etapas"></div>
+<h3 style="margin-top:28px">Exemplo: recomendação de filmes</h3>
+<p>Marque filmes que uma pessoa fictícia já assistiu e veja uma regra simples sugerir novos títulos por semelhança de gênero.</p>
+<div class="chips" id="filmes"></div><div id="filmesres" class="grid" aria-live="polite"></div><div class="cta"><button class="pri" data-go="interesses">▶ DESCUBRA COMO ELE CONHECE VOCÊ</button></div></section>
+
+<section data-tab="riscos" id="riscos"><h2><span>05</span>Benefícios e pontos negativos</h2>
+<div class="two"><div class="pro"><h3>Benefícios</h3><div id="pro"></div></div><div class="con"><h3>Riscos</h3><div id="con"></div></div></div><div class="cta"><button class="pri" data-go="privacidade">▶ PROTEJA SEUS DADOS</button></div></section>
+
+<section data-tab="privacidade" id="privacidade"><h2><span>06</span>Privacidade e segurança</h2><div class="grid" id="priv"></div><div class="cta"><button class="pri" data-scroll="#chk">✔ EXPLORE BOAS PRÁTICAS</button></div>
+<h3 style="margin-top:28px">Boas práticas</h3><p>Marque cada prática conforme aprende.</p>
+<div class="bar2"><i id="pbar"></i></div><p id="ptxt" aria-live="polite">0 de 6 práticas marcadas</p><ul class="chk" id="chk"></ul></section>
+
+<section data-tab="experimento" id="experimento"><h2><span>07</span>Como um algoritmo deduz seus interesses?</h2>
+<div class="note">Simulação educativa simplificada. Tudo acontece no seu navegador: sem cadastro, sem dados pessoais, sem contas e sem localização real. Os conteúdos sugeridos são fictícios.</div>
+<div class="lab"><div class="pn"><h3><span class="stp">1</span>Escolher interesses</h3><div class="chips" id="ints"></div></div><div class="pn">
+<h3><span class="stp">2</span>Selecionar interações fictícias</h3>
+<div class="chips"><select id="act" aria-label="Tipo de interação"><option value="assistir">Assistir a um vídeo</option><option value="curtir">Curtir uma publicação</option><option value="pesquisar">Pesquisar um assunto</option></select><select id="top" aria-label="Assunto"></select><button id="add">Adicionar interação</button></div>
+<div class="chips" id="acts" aria-live="polite"></div></div></div><div class="pipe"><span>Suas escolhas</span><b>→</b><span>Pontuação por tema</span><b>→</b><span>Recomendações</span></div>
+<div class="pn" style="margin-top:16px"><h3><span class="stp">3</span>Gerar e analisar recomendações</h3><div class="btns"><button class="pri big" id="sim">▶ SIMULAR RECOMENDAÇÕES</button><button class="sec" id="save">⇄ Comparar resultados</button><button data-scroll="#ints">✎ Alterar escolhas</button><button id="clr">⌫ Limpar seleções</button><button id="rst">↺ Reiniciar</button></div>
+<div id="out" aria-live="polite"></div></div></section>
+
+<section data-tab="mitos" id="mitos"><h2><span>08</span>Mitos e verdades</h2><div class="grid" id="mit"></div><div class="cta"><button class="pri" data-go="quiz">▶ TESTAR MEUS CONHECIMENTOS</button></div></section>
+
+<section data-tab="quiz" id="quiz"><h2><span>09</span>Quiz</h2><div class="card" id="qz" style="align-items:stretch"></div></section>
+
+<section data-tab="quiz" id="conclusao"><h2><span>10</span>Conclusão</h2>
+<p>Algoritmos podem identificar padrões e estimar interesses a partir de dados, e isso traz conveniência. Mas suas recomendações têm limitações: dependem dos dados disponíveis, das escolhas de quem os projeta e podem errar ou reforçar vieses. Por isso, precisamos compreendê-los de forma crítica, proteger nossa privacidade e lembrar que somos nós que decidimos o que fazer com o que eles sugerem.</p>
+<div class="fin">O algoritmo conhece você? Ele estima o que você faz, não quem você é.<br><span style="color:var(--glow)">O futuro em cada algoritmo.</span></div><div class="cta"><button class="sec" data-go="inicio">↑ VOLTAR AO INÍCIO</button></div></section>
+</main><div id="toast" role="status" aria-live="polite"></div>
+<footer><div class="fw"><div><b class="logo">◉ O algoritmo conhece você?</b><p>O futuro em cada algoritmo</p></div><div><b>Navegação</b><div class="fl"><a href="#inicio">Início</a><a href="#conceito">O que é um algoritmo</a><a href="#interesses">Interesses</a><a href="#cotidiano">Cotidiano</a><a href="#criacao">Criação</a><a href="#riscos">Benefícios e riscos</a><a href="#privacidade">Privacidade</a><a href="#experimento">Experimento</a><a href="#mitos">Mitos e verdades</a><a href="#quiz">Quiz</a></div></div></div><p class="fn">Projeto científico educativo. As simulações são simplificadas e não representam o funcionamento interno de nenhuma plataforma específica.</p></footer>
+<script>
+const $=s=>document.querySelector(s);
+const mb=$('#mb'),nav=$('#nav');
+mb.onclick=()=>{const o=nav.classList.toggle('open');mb.setAttribute('aria-expanded',o)};
+nav.onclick=e=>{if(e.target.tagName==='A'){nav.classList.remove('open');mb.setAttribute('aria-expanded',false)}};
+// toggle simples
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const m=$('#'+b.dataset.t);b.setAttribute('aria-expanded',m.classList.toggle('show'))});
+// cartões expansíveis
+function cards(id,data,lab){$(id).innerHTML=data.map((d,i)=>`<div class="card"><h3>${d[0]}</h3><p>${d[1]}</p>${d[2]?`<button aria-expanded="false" aria-controls="${id.slice(1)}m${i}">${lab}</button><div class="more" id="${id.slice(1)}m${i}">${d[2]}</div>`:''}</div>`).join('');
+$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{b.setAttribute('aria-expanded',b.nextElementSibling.classList.toggle('show'))})}
+cards('#tipos',[
+['Algoritmo tradicional','Segue regras escritas por pessoas.','Exemplo: uma calculadora ou a regra “se a nota for ≥ 6, o aluno é aprovado”. O resultado é totalmente previsível a partir das regras.'],
+['Inteligência artificial','Área ampla que reúne sistemas capazes de realizar tarefas que normalmente exigem inteligência humana.','Inclui reconhecimento de fala, tradução e assistentes de conversa. Nem todo algoritmo é inteligência artificial.'],
+['Aprendizado de máquina','Parte da IA em que o sistema aprende padrões a partir de exemplos, em vez de só seguir regras fixas.','Exemplo: um sistema que recebe milhares de e-mails marcados como spam ou não e aprende a identificar características comuns.']],'Ver exemplo');
+const fl=[['Entrada de informações','São os dados que o sistema recebe: um texto digitado, cliques, notas, fotos ou o histórico de uso.'],['Processamento','O algoritmo aplica regras ou um modelo treinado para analisar a entrada e calcular algo, como uma pontuação de relevância.'],['Resultado','É o que o sistema devolve: uma lista de resultados, uma recomendação, uma previsão ou uma decisão.']];
+function flow(id,txt,arr,first){const el=$(id);el.innerHTML=arr.map((a,i)=>`<button class="node" data-i="${i}">${a[0]}</button>${i<arr.length-1?'<span class="arr" aria-hidden="true">→</span>':''}`).join('');
+const sh=i=>{el.querySelectorAll('.node').forEach((n,j)=>n.classList.toggle('on',i===j));$(txt).textContent=arr[i][1]};
+el.querySelectorAll('.node').forEach(n=>n.onclick=()=>sh(+n.dataset.i));sh(0)}
+flow('#flow','#flowtxt',fl);
+cards('#sinais',[
+['Pesquisas','Os termos buscados indicam um assunto de interesse.','Quem pesquisa “melhores tênis de corrida” pode passar a ver anúncios e conteúdos sobre corrida, mesmo que tenha pesquisado só por curiosidade.'],
+['Curtidas','Mostram que você reagiu positivamente a um conteúdo.','Curtir várias publicações sobre astronomia pode levar o sistema a sugerir mais conteúdos do tema.'],
+['Comentários','O texto e a frequência de comentários podem ser sinais de engajamento.','Comentar em vídeos de culinária pode ser interpretado como interesse em receitas, embora o comentário possa ser uma crítica.'],
+['Vídeos assistidos','O histórico mostra os temas e formatos que você consome.','Assistir a vários vídeos de jogos pode aumentar a chance de aparecerem outros vídeos de jogos.'],
+['Tempo de visualização','Ficar mais tempo em um conteúdo pode ser tratado como sinal de interesse.','Mas é só um indício: você pode ter deixado o vídeo rodando enquanto fazia outra coisa.'],
+['Histórico de interações','O conjunto do que você fez ao longo do tempo forma padrões mais estáveis.','Se você sempre interage com música à noite, o sistema pode priorizar playlists nesse horário.'],
+['Preferências informadas','Escolhas feitas por você, como temas favoritos ou idiomas.','Ao marcar “ciência” ao criar um perfil, o sistema pode usar essa informação desde o início.']],'Ver explicação e exemplo');
+flow('#diag','#diagtxt',[['1. Coleta de dados','O sistema registra sinais de uso, como pesquisas, cliques, curtidas e tempo de visualização, de acordo com as regras e permissões da plataforma.'],['2. Identificação de padrões','Métodos estatísticos ou de aprendizado de máquina buscam regularidades: temas que aparecem juntos, conteúdos parecidos e comportamentos de grupos semelhantes.'],['3. Recomendações','Com base nos padrões, o sistema estima o que pode interessar e ordena conteúdos. É uma estimativa, não uma certeza.']]);
+cards('#cot',[
+['Redes sociais','Organizam o que aparece no seu feed.','Costumam estimar a relevância de cada publicação com base em interações passadas, relações com outras contas e características do conteúdo. Os critérios exatos variam e geralmente não são públicos.'],
+['Plataformas de vídeo','Sugerem o próximo vídeo.','Combinam histórico de visualização, popularidade e semelhança entre vídeos. Podem priorizar o que mantém você assistindo, o que nem sempre é o mais útil.'],
+['Serviços de música','Montam playlists personalizadas.','Comparam músicas que você ouve com as de outras pessoas de gosto parecido e analisam características do áudio, como ritmo e energia.'],
+['Pesquisas na internet','Ordenam resultados por relevância.','Avaliam correspondência com os termos buscados, qualidade e popularidade das páginas e, em alguns casos, idioma e contexto da pesquisa.'],
+['Lojas virtuais','Sugerem produtos.','Usam histórico de buscas e compras e padrões como “quem comprou isto também comprou aquilo”. Também podem ordenar por preço, estoque ou promoções.'],
+['Aplicativos de mapas','Calculam rotas.','Usam algoritmos de caminho mínimo sobre um grafo de ruas e estimam o tempo com dados de trânsito. Aqui há pouca “adivinhação” de gostos e muito cálculo.']],'Como funciona?');
+cards('#etapas',[
+['1. Definir o problema','Qual tarefa queremos resolver?','Exemplo: sugerir filmes que a pessoa tenha chance de gostar. Um problema bem definido evita criar algo inútil.'],
+['2. Escolher regras ou métodos','Regras fixas ou aprendizado de máquina?','Se as regras são simples, basta programá-las. Se o padrão é complexo, pode-se usar um método que aprende com exemplos.'],
+['3. Usar dados quando necessário','Dados servem para treinar e avaliar.','Dados incompletos ou desbalanceados podem produzir resultados enviesados. Por isso a escolha e o cuidado com os dados importam.'],
+['4. Desenvolver ou treinar','Programar o sistema ou ajustar o modelo.','No treinamento, o modelo ajusta parâmetros internos para errar menos nos exemplos fornecidos.'],
+['5. Testar resultados','Verificar com dados novos.','Testa-se em exemplos que o sistema não viu, para saber se ele funciona também em situações novas.'],
+['6. Avaliar possíveis erros','Procurar falhas e injustiças.','Analisa-se quem o sistema atende pior, quais erros são mais graves e se é preciso ajustar. O processo continua após o lançamento.']],'Ver detalhes');
+// filmes
+const F={'Ficção científica':['Viagem ao Planeta Azul','Códigos do Amanhã'],'Comédia':['Confusão no Condomínio','A Semana Mais Louca'],'Documentário':['Oceanos Profundos','A Ciência do Dia a Dia'],'Aventura':['A Ilha dos Mapas','Expedição Selvagem'],'Animação':['Robôs de Quintal','O Reino das Cores']};
+const fs=new Set();
+$('#filmes').innerHTML=Object.keys(F).map(g=>`<button class="chip" aria-pressed="false">${g}</button>`).join('');
+$('#filmes').querySelectorAll('button').forEach(b=>b.onclick=()=>{const g=b.textContent;fs.has(g)?fs.delete(g):fs.add(g);b.setAttribute('aria-pressed',fs.has(g));
+$('#filmesres').innerHTML=fs.size?[...fs].map(g=>`<div class="card rec"><h3>${F[g][0]}</h3><p>Sugerido porque a pessoa assistiu a títulos de <b>${g}</b>. Regra simples: gêneros já assistidos pontuam mais.</p></div>`).join(''):'<div class="note">Marque ao menos um gênero para ver as sugestões. Sem histórico, o sistema não tem base para recomendar.</div>'});
+$('#filmesres').innerHTML='<div class="note">Marque ao menos um gênero para ver as sugestões. Sem histórico, o sistema não tem base para recomendar.</div>';
+cards('#pro',[['Facilitam pesquisas','Ajudam a achar o que importa em meio a muita informação.','Sem algoritmos de busca seria praticamente impossível encontrar uma página entre bilhões.'],['Organizam informações','Classificam e filtram grandes volumes de dados.','Filtros de spam separam mensagens indesejadas do seu e-mail.'],['Personalizam experiências','Adaptam conteúdos ao uso de cada pessoa.','Uma plataforma de estudos pode sugerir exercícios no nível do aluno.'],['Automatizam tarefas','Fazem tarefas repetitivas com rapidez.','Aplicativos de banco detectam padrões de compra incomuns e alertam sobre possíveis fraudes.']],'Ver exemplo');
+cards('#con',[['Recomendações inadequadas','Sugestões fora de contexto ou nocivas.','Um sistema pode sugerir conteúdo impróprio para a idade ou repetir temas que a pessoa já não quer ver.'],['Vieses e discriminação','Dados e critérios podem refletir preconceitos.','Se um sistema de seleção aprende com decisões passadas desiguais, pode repetir essas desigualdades.'],['Desinformação em certos contextos','Conteúdos que geram muito engajamento podem ser favorecidos.','Se o critério for só atenção, informações falsas chamativas podem se espalhar mais. Plataformas adotam medidas diferentes contra isso.'],['Coleta excessiva de dados','Mais dados do que o necessário.','Coletar além do necessário aumenta riscos de vazamento e de uso indevido.'],['Falta de transparência','Nem sempre é claro por que algo foi recomendado.','Modelos complexos são difíceis de explicar, mesmo para quem os cria. Por isso há debate sobre explicabilidade.']],'Ver exemplo');
+cards('#priv',[['Dados pessoais','Informações que identificam ou podem identificar uma pessoa.','Nome, e-mail, número de documento, localização e histórico de navegação, dependendo do contexto. No Brasil, a LGPD protege esses dados.'],['Permissões de aplicativos','Autorizações para acessar câmera, microfone, contatos ou localização.','Um app de lanterna não precisa acessar seus contatos. Conceda só o que a função exige.'],['Revisar configurações','Plataformas oferecem controles de privacidade.','É possível limitar histórico, anúncios personalizados e visibilidade do perfil. Vale revisar de tempos em tempos.'],['Compartilhar informações','Pense antes de publicar ou enviar dados.','Uma foto com o uniforme da escola e o endereço pode revelar mais do que você imagina.']],'Saiba mais');
+const P=[['Revisar as permissões dos aplicativos','Remova acessos que o app não precisa para funcionar.'],['Ajustar as configurações de privacidade','Defina quem vê seu perfil e o que a plataforma guarda.'],['Usar senhas fortes e únicas','Prefira frases longas e, se possível, ative a verificação em duas etapas.'],['Evitar compartilhar dados sensíveis','Documentos, endereço e rotina não devem ir para desconhecidos.'],['Desconfiar de links e pedidos urgentes','Golpes costumam pedir pressa e dados pessoais.'],['Conversar com responsáveis ou professores','Dúvidas sobre privacidade são mais fáceis de resolver em conjunto.']];
+$('#chk').innerHTML=P.map((p,i)=>`<li><label><input type="checkbox"><span>${p[0]}</span></label><small>${p[1]}</small></li>`).join('');
+$('#chk').onchange=()=>{const n=$('#chk').querySelectorAll(':checked').length;$('#pbar').style.width=n/P.length*100+'%';$('#ptxt').textContent=`${n} de ${P.length} práticas marcadas`+(n===P.length?'. Parabéns!':'')};
+// experimento
+const T={musica:['Música',['Playlist “Pulso Elétrico” (fictícia)','Álbum “Ondas Digitais” (fictício)']],futebol:['Futebol',['Vídeo “Táticas do Meio-Campo” (fictício)','Podcast “Bola Rolando” (fictício)']],jogos:['Jogos',['Canal “Fase Bônus” (fictício)','Guia “Estratégias de Tabuleiro” (fictício)']],filmes:['Filmes',['Lista “Ficção em Alta” (fictícia)','Crítica “Bastidores do Cinema” (fictícia)']],ciencia:['Ciência',['Vídeo “Buracos Negros em 5 minutos” (fictício)','Revista “Laboratório Aberto” (fictícia)']],tecnologia:['Tecnologia',['Artigo “Como funciona um chip” (fictício)','Vídeo “Robótica para iniciantes” (fictício)']],culinaria:['Culinária',['Receita “Bolo de Cenoura Perfeito” (fictícia)','Vídeo “Massas Caseiras” (fictício)']],viagens:['Viagens',['Guia “Roteiro de 3 dias” (fictício)','Vlog “Trilhas e Paisagens” (fictício)']]};
+const W={assistir:3,curtir:2,pesquisar:4},AN={assistir:'assistiu a um vídeo sobre',curtir:'curtiu uma publicação sobre',pesquisar:'pesquisou sobre'};
+let ints=new Set(),acts=[],saved=null,cur=null;
+$('#ints').innerHTML=Object.keys(T).map(k=>`<button class="chip" aria-pressed="false" data-k="${k}">${T[k][0]}</button>`).join('');
+$('#top').innerHTML=Object.keys(T).map(k=>`<option value="${k}">${T[k][0]}</option>`).join('');
+$('#ints').querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;ints.has(k)?ints.delete(k):ints.add(k);b.setAttribute('aria-pressed',ints.has(k))});
+function drawActs(){$('#acts').innerHTML=acts.map((a,i)=>`<button class="chip" data-i="${i}" title="Remover">${AN[a[0]]} ${T[a[1]][0]} ✕</button>`).join('')||'<span style="color:var(--mut)">Nenhuma interação adicionada.</span>';
+$('#acts').querySelectorAll('button').forEach(b=>b.onclick=()=>{acts.splice(+b.dataset.i,1);drawActs()})}
+$('#add').onclick=()=>{acts.push([$('#act').value,$('#top').value]);drawActs()};
+function compute(){const s={},why={};const add=(k,v,t)=>{s[k]=(s[k]||0)+v;(why[k]=why[k]||[]).push(t)};
+ints.forEach(k=>add(k,2,`você marcou ${T[k][0]} como interesse (+2)`));
+acts.forEach(a=>add(a[1],W[a[0]],`você ${AN[a[0]]} ${T[a[1]][0]} (+${W[a[0]]})`));
+return Object.keys(s).sort((a,b)=>s[b]-s[a]).slice(0,4).map(k=>({k,sc:s[k],why:why[k]}))}
+function rhtml(r,title){return `<h3>${title}</h3><div class="grid">${r.map((x,i)=>`<div class="card rec"><h3>${T[x.k][1][i%2]}</h3><small>Pontuação de interesse em ${T[x.k][0]}: ${x.sc}</small><div class="bar2" style="width:100%"><i style="width:${Math.min(100,x.sc*14)}%"></i></div><p>Por quê: ${x.why.join('; ')}.</p></div>`).join('')}</div>`}
+function render(){const o=$('#out');if(!cur){o.innerHTML='';return}
+let h=cur.length?'':'<div class="note">Escolha interesses ou adicione interações e simule novamente. Sem informações, não há como estimar nada.</div>';
+if(cur.length){h+=`<div class="${saved?'two':''}">${saved?`<div>${rhtml(saved,'Resultado salvo')}</div>`:''}<div>${rhtml(cur,saved?'Resultado atual':'Recomendações simuladas')}</div></div>`;
+const one=cur.filter(x=>!ints.has(x.k)&&acts.filter(a=>a[1]===x.k).length===1);
+h+=`<div class="note"><b>E se o algoritmo errar?</b> ${one.length?`Veja ${T[one[0].k][0]}: ele apareceu por uma única interação. Talvez fosse só curiosidade, uma tarefa escolar ou um clique sem querer, mas o sistema pode interpretar como interesse. `:''}Esta simulação usa regras simples de pontuação. Sistemas reais usam muito mais sinais, e mesmo assim podem exagerar um interesse passageiro ou ignorar o que você realmente gosta. Pessoas diferentes, com escolhas diferentes, recebem recomendações diferentes.</div>`}
+o.innerHTML=h}
+$('#sim').onclick=()=>{const b=$('#sim');b.disabled=true;b.classList.add('busy');b.textContent='⏳ PROCESSANDO…';setTimeout(()=>{cur=compute();render();b.disabled=false;b.classList.remove('busy');b.textContent='▶ SIMULAR RECOMENDAÇÕES';toast(cur.length?'Recomendações geradas':'Faça escolhas para simular');$('#out').scrollIntoView({behavior:'smooth',block:'nearest'})},450)};
+$('#save').onclick=()=>{cur=compute();if(!cur.length){render();return}saved=cur;render();$('#out').insertAdjacentHTML('afterbegin','<div class="note">Resultado salvo. Mude suas escolhas e clique em “Simular recomendações” para comparar.</div>')};
+function clearSel(){ints.clear();acts=[];$('#ints').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',false));drawActs()}
+$('#clr').onclick=()=>{clearSel();cur=null;render()};
+$('#rst').onclick=()=>{clearSel();saved=null;cur=null;$('#act').selectedIndex=0;$('#top').selectedIndex=0;render()};
+drawActs();
+// mitos
+const M=[['Todo algoritmo utiliza inteligência artificial.',0,'Mito. Muitos algoritmos são sequências fixas de regras, como uma receita ou um cálculo de média. A IA é apenas um tipo.'],['Um algoritmo sabe exatamente o que estou pensando.',0,'Mito. Ele só tem acesso aos sinais que coleta e faz estimativas. Não lê pensamentos.'],['Os algoritmos podem cometer erros.',1,'Verdade. Dados ruins, critérios inadequados ou situações novas podem levar a falhas.'],['Pessoas diferentes podem receber recomendações diferentes.',1,'Verdade. As recomendações dependem do histórico, das preferências e do contexto de cada pessoa.'],['Minhas interações podem influenciar os conteúdos recomendados.',1,'Verdade. Em muitas plataformas, curtidas, buscas e tempo de visualização podem alterar o que aparece depois. Nem toda plataforma funciona do mesmo jeito.']];
+$('#mit').innerHTML=M.map((m,i)=>`<div class="card"><h3>“${m[0]}”</h3><button aria-expanded="false" aria-controls="mm${i}">Mito ou verdade?</button><div class="more" id="mm${i}"><b style="color:${m[1]?'var(--ok)':'var(--bad)'}">${m[2].split('.')[0]}.</b>${m[2].slice(m[2].indexOf('.')+1)}</div></div>`).join('');
+$('#mit').querySelectorAll('button').forEach(b=>b.onclick=()=>b.setAttribute('aria-expanded',b.nextElementSibling.classList.toggle('show')));
+// quiz
+const Q=[
+['O que é um algoritmo?',['Um tipo de vírus de computador','Uma sequência finita de passos para resolver um problema','Um aplicativo de rede social','Um site de buscas'],1,'Algoritmo é um conjunto ordenado de passos bem definidos, como uma receita.'],
+['Quais são as etapas do fluxograma apresentado?',['Entrada, processamento e resultado','Curtida, comentário e compartilhamento','Teste, venda e lucro','Cadastro, senha e login'],0,'Todo algoritmo recebe informações, processa e produz um resultado.'],
+['O que caracteriza o aprendizado de máquina?',['O sistema aprende padrões a partir de exemplos','O sistema só segue regras fixas','O sistema pensa como uma pessoa','O sistema não usa dados'],0,'No aprendizado de máquina, o modelo ajusta seus parâmetros com base em dados.'],
+['O tempo de visualização de um vídeo é:',['Prova de que você gostou','Um sinal que pode indicar interesse, sem certeza','Irrelevante para qualquer sistema','Sempre um dado secreto'],1,'É apenas um indício. Você pode ter deixado o vídeo rodando sem prestar atenção.'],
+['As recomendações de um algoritmo são:',['Certezas sobre sua personalidade','Estimativas que podem estar erradas','Sempre neutras e justas','Idênticas para todos'],1,'Recomendações são estimativas baseadas em padrões e podem falhar.'],
+['Qual costuma ser a primeira etapa na criação de um algoritmo?',['Lançar para o público','Definir o problema a ser resolvido','Coletar senhas','Apagar os dados'],1,'Sem um problema bem definido, não dá para escolher métodos nem avaliar resultados.'],
+['O que é viés em um sistema?',['Um erro de digitação','Uma tendência que gera resultados injustos ou distorcidos','Uma configuração de cor','Um tipo de cabo'],1,'O viés pode vir dos dados ou dos critérios usados e pode prejudicar certos grupos.'],
+['O que são dados pessoais?',['Somente senhas','Informações que identificam ou podem identificar uma pessoa','Dados de empresas','Arquivos do sistema'],1,'Nome, localização e histórico de uso podem ser dados pessoais, dependendo do contexto.'],
+['Qual é uma boa prática de privacidade?',['Aceitar todas as permissões','Revisar as permissões e as configurações de privacidade','Usar a mesma senha em tudo','Postar o endereço de casa'],1,'Conceder apenas as permissões necessárias reduz riscos.'],
+['Duas pessoas assistem a vídeos diferentes na mesma plataforma. O que tende a acontecer?',['Recebem exatamente as mesmas recomendações','Podem receber recomendações diferentes','Não recebem recomendação nenhuma','Sempre veem só anúncios'],1,'A personalização depende do histórico e das interações de cada pessoa.']];
+let qi=0,qs=0,qsel=-1,qdone=false;
+function qr(){const c=$('#qz');
+if(qi>=Q.length){const p=qs/Q.length;c.innerHTML=`<h3>Resultado final: ${qs} de ${Q.length}</h3><p>${p>=.8?'Excelente! Você domina bem o tema e já pensa de forma crítica sobre algoritmos.':p>=.5?'Bom desempenho! Revise as seções em que teve dúvidas e tente novamente.':'Vale revisar o conteúdo do site com calma. Releia as seções e refaça o quiz.'}</p><div class="bar2"><i style="width:${p*100}%"></i></div><div class="btns"><button class="pri" id="qr">↺ REFAZER O QUIZ</button></div>`;$('#qr').onclick=()=>{qi=0;qs=0;qsel=-1;qdone=false;qr()};return}
+const q=Q[qi];
+c.innerHTML=`<p>Pergunta ${qi+1} de ${Q.length}</p><div class="bar2"><i style="width:${qi/Q.length*100}%"></i></div><h3 style="margin-top:14px">${q[0]}</h3><div role="radiogroup" aria-label="Alternativas">${q[1].map((o,i)=>`<button class="opt${qdone?(i===q[2]?' ok':i===qsel?' no':''):''}" role="radio" aria-checked="${i===qsel}" data-i="${i}" ${qdone?'disabled':''}>${'ABCD'[i]}) ${o}</button>`).join('')}</div><div id="fb" aria-live="polite"></div><div class="btns"><button class="pri" id="qc" ${qdone?'style="display:none"':''}>✔ CONFIRMAR RESPOSTA</button><button class="pri" id="qn" ${qdone?'':'style="display:none"'}>${qi===Q.length-1?'🏁 VER RESULTADO':'PRÓXIMA PERGUNTA →'}</button></div>`;
+if(qdone)$('#fb').innerHTML=`<div class="note"><b style="color:${qsel===q[2]?'var(--ok)':'var(--bad)'}">${qsel===q[2]?'Correto!':'Incorreto. A resposta certa é '+'ABCD'[q[2]]+'.'}</b> ${q[3]}</div>`;
+c.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{qsel=+b.dataset.i;c.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-checked',x===b))});
+$('#qc').onclick=()=>{if(qsel<0){$('#fb').innerHTML='<div class="note">Selecione uma alternativa antes de confirmar.</div>';return}if(qsel===q[2])qs++;qdone=true;qr()};
+$('#qn').onclick=()=>{qi++;qsel=-1;qdone=false;qr()}}
+qr();
+
+
+// ===== abas =====
+const rmo=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const secs=[...document.querySelectorAll('[data-tab]')],navL=[...document.querySelectorAll('nav a')];
+let tab='inicio',sub='a';
+function show(){secs.forEach(e=>{const on=e.dataset.tab===tab&&(!e.dataset.sub||e.dataset.sub===sub);e.classList.toggle('off',!on);if(on&&!rmo){e.classList.remove('enter');void e.offsetWidth;e.classList.add('enter')}});
+navL.forEach(a=>{const t=document.getElementById(a.getAttribute('href').slice(1));t&&t.dataset.tab===tab?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current')});
+document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',$('#'+b.dataset.go).dataset.sub===sub));
+document.body.dataset.t=tab}
+function go(id,push){const e=document.getElementById(id);if(!e||!e.dataset.tab)return false;tab=e.dataset.tab;if(e.dataset.sub)sub=e.dataset.sub;show();scrollTo({top:0,behavior:rmo?'auto':'smooth'});if(push)history.pushState(null,'','#'+id);return true}
+document.addEventListener('click',e=>{const el=e.target.closest('a[href^="#"],[data-go],[data-scroll]');if(!el)return;
+if(el.dataset.scroll){const t=$(el.dataset.scroll);t.scrollIntoView({behavior:rmo?'auto':'smooth',block:'center'});const f=t.querySelector('input,button');f&&f.focus({preventScroll:true});return}
+if(go(el.dataset.go||el.getAttribute('href').slice(1),true))e.preventDefault()});
+addEventListener('popstate',()=>{go(location.hash.slice(1))||go('inicio')});
+go(location.hash.slice(1))||go('inicio');
+// ===== avisos =====
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)};
+$('#add').addEventListener('click',()=>toast('Interação adicionada'));
+$('#save').addEventListener('click',()=>toast(saved?'Resultado salvo. Mude as escolhas e simule de novo para comparar':'Faça escolhas antes de salvar'));
+$('#clr').addEventListener('click',()=>toast('Seleções limpas'));
+$('#rst').addEventListener('click',()=>toast('Experimento reiniciado'));
+$('#chk').addEventListener('change',()=>{if($('#chk').querySelectorAll(':checked').length===P.length)toast('Todas as práticas marcadas. Parabéns!')});
+// ===== fundo de rede neural =====
+(()=>{const c=$('#bg'),x=c.getContext('2d'),mob=innerWidth<700;let W,H,pts=[];
+function size(){const d=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);pts=Array.from({length:mob?26:64},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.4+.8,p:Math.random()<.2}))}
+function draw(mv){x.clearRect(0,0,W,H);const D=mob?110:150;
+for(let i=0;i<pts.length;i++){const a=pts[i];if(mv){a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1}
+for(let j=i+1;j<pts.length;j++){const b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<D){x.strokeStyle='rgba(77,163,255,'+(.3*(1-d/D))+')';x.lineWidth=1;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}
+x.fillStyle=a.p?'#8b5cff':'#4da3ff';x.beginPath();x.arc(a.x,a.y,a.r,0,7);x.fill()}}
+size();addEventListener('resize',()=>{size();rmo&&draw(false)});
+if(rmo)draw(false);else{(function l(){if(!document.hidden)draw(true);requestAnimationFrame(l)})()}})();
+</script>
+</body>
+</html>
